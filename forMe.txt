@@ -1,0 +1,130 @@
+const express = require("express");
+
+const app = express();
+app.use(express.json());
+const PORT = 3000;
+
+const validateProject = (req, res, next) => {
+  const { name, status } = req.body;
+  if (!name || !status) {
+    return res.status(400).json({
+      message: "name and status are required",
+    });
+  }
+  if (status !== "completed" && status !== "active") {
+    return res.status(400).json({
+      message: "status must be completed or active",
+    });
+  }
+  next();
+};
+
+const projects = [
+  {
+    id: 1,
+    name: "AI Study Companion",
+    status: "active",
+  },
+  {
+    id: 2,
+    name: "Portfolio Website",
+    status: "completed",
+  },
+];
+
+app.get("/", (req, res) => {
+  res.send("Welcome to DevHub API");
+});
+
+app.get("/projects", (req, res) => {
+  res.json(projects);
+});
+
+app.get("/projects/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const project = projects.find((project) => project.id === id);
+  if (!project) {
+    return res.status(404).json({ message: "Project Not Foudn" });
+  }
+  res.json(project);
+});
+
+app.get("/users", (req, res) => {
+  res.json(users);
+});
+
+app.post("/users", (req, res) => {});
+
+app.post("/projects", validateProject, (req, res) => {
+  const { name, status } = req.body;
+  const newProject = {
+    id: projects.length + 1,
+    name: name,
+    status: status,
+  };
+  projects.push(newProject);
+  res.status(201).json(newProject);
+});
+
+app.put("/projects/:id", validateProject, (req, res) => {
+  const id = Number(req.params.id);
+  const project = projects.find((project) => project.id === id);
+  if (!project) {
+    return res.status(404).json({
+      message: "Project Not Found",
+    });
+  }
+  const { name, status } = req.body;
+
+  project.name = name;
+  project.status = status;
+  res.json(project);
+});
+
+app.patch("/projects/:id", (req,res)=>{
+    const id = Number(req.params.id);
+    const project = projects.find(project=>project.id === id);
+    if(!project){
+        return res.status(404).json({
+            message : "Project not found"
+        })
+    };
+    const {name, status} = req.body;
+    if(name !== undefined){
+        if(!name){
+            return res.status(400).json({
+                messsage : "Name cannot be empty)"
+            })
+        }
+        project.name = name;
+    }
+    if(status !== undefined){
+        if(status !== "active" && status !== "completed"){
+            return res.status(400).json({
+                message : "Status must be completed or active"
+            })
+        }
+        project.status = status;
+    }
+    res.json(project);
+
+})
+
+app.delete("/projects/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const projectIndex = projects.findIndex((project) => project.id === id);
+  if (projectIndex === -1) {
+    return res.status(404).json({
+      message: "Project not found",
+    });
+  }
+  const deletedProject = projects.splice(projectIndex, 1);
+  res.json({
+    message: "Project deleted successfully",
+    project: deletedProject[0],
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`DevHub API running on port ${PORT}`);
+});
