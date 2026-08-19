@@ -37,9 +37,7 @@ const updateProject = (req, res) => {
     const project = projects.find(project => project.id === id);
 
     if (!project) {
-        return res.status(404).json({
-            message: "Project not found"
-        });
+       throw new AppError("Project not found", 404);
     }
 
     const { name, status } = req.body;
@@ -56,18 +54,14 @@ const updateProjectPartially = (req, res) => {
     const project = projects.find(project => project.id === id);
 
     if (!project) {
-        return res.status(404).json({
-            message: "Project not found"
-        });
+       throw new AppError("Project not found", 404);
     }
 
     const { name, status } = req.body;
 
     if (name !== undefined) {
         if (!name) {
-            return res.status(400).json({
-                message: "Name cannot be empty"
-            });
+            throw new AppError("Project not found", 404);
         }
 
         project.name = name;
@@ -75,9 +69,7 @@ const updateProjectPartially = (req, res) => {
 
     if (status !== undefined) {
         if (status !== "active" && status !== "completed") {
-            return res.status(400).json({
-                message: "Status must be active or completed"
-            });
+            throw new AppError("Status must be active or completed", 404);
         }
 
         project.status = status;
@@ -90,9 +82,7 @@ const deleteProject = (req,res)=>{
     const id = Number(req.params.id);
     const projectIndex = projects.findIndex(p => p.id == id);
     if(projectIndex === -1){
-        return res.status(404).json({
-            message : "Project not found"
-        })
+        throw new AppError("project not found" , 404);
     }
     const deletedProject = project.splice(projectIndex, 1);
     res.json({
