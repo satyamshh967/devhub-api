@@ -3,18 +3,19 @@ const express = require("express");
 const router = express.Router();
 
 const validateProject = require("../middleware/projectValidation");
+const validateProjectQuery = require("../middleware/projectQueryValidation");
 const asyncHandler = require("../middleware/asyncHandler");
 
 const {
-    getProjects,
-    getProject,
-    createProject,
-    updateProject,
-    updateProjectPartially,
-    deleteProject
+  getProjects,
+  getProject,
+  createProject,
+  updateProject,
+  updateProjectPartially,
+  deleteProject,
 } = require("../controllers/projectController");
 
-router.get("/", asyncHandler(getProjects));
+router.get("/", validateProjectQuery, asyncHandler(getProjects));
 
 router.get("/:id", asyncHandler(getProject));
 

@@ -2,9 +2,43 @@ const AppError = require("../middleware/AppError");
 const Project = require("../models/Project");
 
 const getProjects = async (req, res) => {
-    const projects = await Project.find();
+    const {
+        page = 1,
+        limit = 10,
+        status,
+        search,
+        sort = "-createdAt"
+    } = req.query;
 
-    res.json(projects);
+    const query = {};
+
+    if (status) {
+        query.status = status;
+    }
+
+    if (search) {
+        query.name = {
+            $regex: search,
+            $options: "i"
+        };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const projects = await Project.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(Number(limit));
+
+    const total = await Project.countDocuments(query);
+
+    res.json({
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / limit),
+        projects
+    });
 };
 
 const getProject = async (req, res) => {
