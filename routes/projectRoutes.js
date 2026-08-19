@@ -5,6 +5,7 @@ const router = express.Router();
 const validateProject = require("../middleware/projectValidation");
 const validateProjectQuery = require("../middleware/projectQueryValidation");
 const asyncHandler = require("../middleware/asyncHandler");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   getProjects,
@@ -15,16 +16,16 @@ const {
   deleteProject,
 } = require("../controllers/projectController");
 
-router.get("/", validateProjectQuery, asyncHandler(getProjects));
+router.get("/", authMiddleware, asyncHandler(getProjects));
 
-router.get("/:id", asyncHandler(getProject));
+router.get("/:id", authMiddleware, asyncHandler(getProject));
 
-router.put("/:id", validateProject, asyncHandler(updateProject));
+router.put("/:id", authMiddleware, validateProject, asyncHandler(updateProject));
 
-router.patch("/:id", asyncHandler(updateProjectPartially));
+router.patch("/:id", authMiddleware, asyncHandler(updateProjectPartially));
 
-router.post("/", validateProject, asyncHandler(createProject));
+router.post("/", authMiddleware, validateProject, asyncHandler(createProject));
 
-router.delete("/:id", asyncHandler(deleteProject));
+router.delete("/:id", authMiddleware, asyncHandler(deleteProject));
 
 module.exports = router;
