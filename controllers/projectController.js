@@ -10,7 +10,9 @@ const getProjects = async (req, res) => {
         sort = "-createdAt"
     } = req.query;
 
-    const query = {};
+    const query = {
+        user: req.user.userId
+    };
 
     if (status) {
         query.status = status;
@@ -25,7 +27,8 @@ const getProjects = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const projects = await Project.find(query)
+    const projects = await Project
+        .find(query)
         .sort(sort)
         .skip(skip)
         .limit(Number(limit));
@@ -36,13 +39,16 @@ const getProjects = async (req, res) => {
         page: Number(page),
         limit: Number(limit),
         total,
-        pages: Math.ceil(total / limit),
+        pages: Math.ceil(total / Number(limit)),
         projects
     });
 };
 
 const getProject = async (req, res) => {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findOne({
+        _id: req.params.id,
+        user: req.user.userId
+    });
 
     if (!project) {
         throw new AppError("Project not found", 404);
@@ -56,14 +62,18 @@ const createProject = async (req, res) => {
 
     const newProject = await Project.create({
         name,
-        status
+        status,
+        user: req.user.userId
     });
 
     res.status(201).json(newProject);
 };
 
 const updateProject = async (req, res) => {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findOne({
+        _id: req.params.id,
+        user: req.user.userId
+    });
 
     if (!project) {
         throw new AppError("Project not found", 404);
@@ -80,7 +90,10 @@ const updateProject = async (req, res) => {
 };
 
 const updateProjectPartially = async (req, res) => {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findOne({
+        _id: req.params.id,
+        user: req.user.userId
+    });
 
     if (!project) {
         throw new AppError("Project not found", 404);
@@ -113,13 +126,19 @@ const updateProjectPartially = async (req, res) => {
 };
 
 const deleteProject = async (req, res) => {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findOne({
+        _id: req.params.id,
+        user: req.user.userId
+    });
 
     if (!project) {
         throw new AppError("Project not found", 404);
     }
 
-    await Project.findByIdAndDelete(req.params.id);
+    await Project.findOneAndDelete({
+        _id: req.params.id,
+        user: req.user.userId
+    });
 
     res.json({
         message: "Project deleted successfully",

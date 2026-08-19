@@ -1,30 +1,21 @@
 require("dotenv").config();
 
+const app = require("./app");
 const connectDB = require("./config/db");
-const express = require("express");
-
-const authRoutes = require("./routes/authRoutes");
-const projectRoutes = require("./routes/projectRoutes");
-
-const app = express();
 
 const PORT = 3000;
 
-app.use(express.json());
+const startServer = async () => {
+    try {
+        await connectDB();
 
-app.use("/auth", authRoutes);
-app.use("/projects", projectRoutes);
+        app.listen(PORT, () => {
+            console.log(`DevHub API running on port ${PORT}`);
+        });
+    } catch (error) {
+        console.error("Failed to start server:", error.message);
+        process.exit(1);
+    }
+};
 
-app.get("/", (req, res) => {
-    res.send("Welcome to DevHub API");
-});
-
-const errorHandler = require("./middleware/errorHandler");
-
-app.use(errorHandler);
-
-connectDB();
-
-app.listen(PORT, () => {
-    console.log(`DevHub API running on port ${PORT}`);
-});
+startServer();
