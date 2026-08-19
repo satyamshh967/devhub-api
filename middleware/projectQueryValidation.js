@@ -1,31 +1,65 @@
 const AppError = require("./AppError");
-const appError = require("./AppError")
-const validateProjectQuery = (req, res, next)=>{
-    const {page, limit, status} = req.query;
-    if(page!=undefined){
+
+const validateProjectQuery = (req, res, next) => {
+    const { page, limit, status } = req.query;
+
+    if (page !== undefined) {
         const pageNumber = Number(page);
-        if(!Number.isInteger(pageNumber) || pageNumber< 1){
+
+        if (
+            !Number.isInteger(pageNumber) ||
+            pageNumber < 1
+        ) {
             throw new AppError(
-                "Page must be a postive integer", 400
-            )
+                "Page must be a positive integer",
+                400
+            );
         }
-    };
-    if(limit !== undefined){
+
+        req.query.page = pageNumber;
+    }
+
+    if (limit !== undefined) {
         const limitNumber = Number(limit);
-        if(
+
+        if (
             !Number.isInteger(limitNumber) ||
             limitNumber < 1 ||
             limitNumber > 100
-        ){
+        ) {
             throw new AppError(
-                "Limit must be between 1 to 100", 400
-            )
+                "Limit must be between 1 and 100",
+                400
+            );
         }
+
+        req.query.limit = limitNumber;
     }
-    if(status !== undefined && status !== "completed"){
-        throw new AppError("Status must be active or completed", 400);
+
+    if (status !== undefined) {
+        if (typeof status !== "string") {
+            throw new AppError(
+                "Status must be a string",
+                400
+            );
+        }
+
+        const normalizedStatus = status.trim().toLowerCase();
+
+        if (
+            normalizedStatus !== "active" &&
+            normalizedStatus !== "completed"
+        ) {
+            throw new AppError(
+                "Status must be active or completed",
+                400
+            );
+        }
+
+        req.query.status = normalizedStatus;
     }
+
     next();
-}
+};
 
 module.exports = validateProjectQuery;
