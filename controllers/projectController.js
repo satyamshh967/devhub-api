@@ -1,8 +1,9 @@
-const Project = require("../models/Project");
-// const projects = require("../data/projects");
 const AppError = require("../middleware/AppError");
+const Project = require("../models/Project");
 
-const getProjects = (req, res) => {
+const getProjects = async (req, res) => {
+    const projects = await Project.find();
+
     res.json(projects);
 };
 
@@ -20,8 +21,9 @@ const createProject = async (req, res) => {
     const { name, status } = req.body;
 
     const newProject = await Project.create({
-        name, status
-    })
+        name,
+        status
+    });
 
     res.status(201).json(newProject);
 };
