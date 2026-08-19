@@ -1,3 +1,5 @@
+require("dotenv").config();
+const connectDB = require("./config/db");
 const express = require("express");
 
 const app = express();
@@ -16,6 +18,7 @@ app.get("/", (req, res) => {
 const errorHandler = require("./middleware/errorHandler");
 app.use(errorHandler);
 
+connectDB();
 app.listen(PORT, () => {
     console.log(`DevHub API running on port ${PORT}`);
 });

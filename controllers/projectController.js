@@ -1,14 +1,13 @@
-const projects = require("../data/projects");
+const Project = require("../models/Project");
+// const projects = require("../data/projects");
 const AppError = require("../middleware/AppError");
 
 const getProjects = (req, res) => {
     res.json(projects);
 };
 
-const getProject = (req, res) => {
-    const id = Number(req.params.id);
-
-    const project = projects.find(project => project.id === id);
+const getProject = async (req, res) => {
+    const project = await Project.findById(req.params.id);
 
     if (!project) {
         throw new AppError("Project not found", 404);
@@ -17,27 +16,21 @@ const getProject = (req, res) => {
     res.json(project);
 };
 
-const createProject = (req, res) => {
+const createProject = async (req, res) => {
     const { name, status } = req.body;
 
-    const newProject = {
-        id: projects.length + 1,
-        name: name,
-        status: status
-    };
-
-    projects.push(newProject);
+    const newProject = await Project.create({
+        name, status
+    })
 
     res.status(201).json(newProject);
 };
 
-const updateProject = (req, res) => {
-    const id = Number(req.params.id);
-
-    const project = projects.find(project => project.id === id);
+const updateProject = async (req, res) => {
+    const project = await Project.findById(req.params.id);
 
     if (!project) {
-       throw new AppError("Project not found", 404);
+        throw new AppError("Project not found", 404);
     }
 
     const { name, status } = req.body;
@@ -45,23 +38,23 @@ const updateProject = (req, res) => {
     project.name = name;
     project.status = status;
 
+    await project.save();
+
     res.json(project);
 };
 
-const updateProjectPartially = (req, res) => {
-    const id = Number(req.params.id);
-
-    const project = projects.find(project => project.id === id);
+const updateProjectPartially = async (req, res) => {
+    const project = await Project.findById(req.params.id);
 
     if (!project) {
-       throw new AppError("Project not found", 404);
+        throw new AppError("Project not found", 404);
     }
 
     const { name, status } = req.body;
 
     if (name !== undefined) {
         if (!name) {
-            throw new AppError("Project not found", 404);
+            throw new AppError("Name cannot be empty", 400);
         }
 
         project.name = name;
@@ -69,27 +62,34 @@ const updateProjectPartially = (req, res) => {
 
     if (status !== undefined) {
         if (status !== "active" && status !== "completed") {
-            throw new AppError("Status must be active or completed", 404);
+            throw new AppError(
+                "Status must be active or completed",
+                400
+            );
         }
 
         project.status = status;
     }
 
+    await project.save();
+
     res.json(project);
 };
 
-const deleteProject = (req,res)=>{
-    const id = Number(req.params.id);
-    const projectIndex = projects.findIndex(p => p.id == id);
-    if(projectIndex === -1){
-        throw new AppError("project not found" , 404);
+const deleteProject = async (req, res) => {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+        throw new AppError("Project not found", 404);
     }
-    const deletedProject = project.splice(projectIndex, 1);
+
+    await Project.findByIdAndDelete(req.params.id);
+
     res.json({
-        message : "Project deleted successfully",
-        project : deleteProject[0]
-    })
-}
+        message: "Project deleted successfully",
+        project
+    });
+};
 
 module.exports = {
     getProjects,

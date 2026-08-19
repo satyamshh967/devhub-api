@@ -1,6 +1,9 @@
 const express = require("express");
+
 const router = express.Router();
+
 const validateProject = require("../middleware/projectValidation");
+const asyncHandler = require("../middleware/asyncHandler");
 
 const {
     getProjects,
@@ -11,11 +14,16 @@ const {
     deleteProject
 } = require("../controllers/projectController");
 
-router.get("/", getProjects);
-router.get("/:id", getProject);
-router.put("/:id", validateProject, updateProject);
-router.patch("/:id", updateProjectPartially);
-router.post("/", validateProject, createProject);
-router.delete("/:id", deleteProject);
+router.get("/", asyncHandler(getProjects));
+
+router.get("/:id", asyncHandler(getProject));
+
+router.put("/:id", validateProject, asyncHandler(updateProject));
+
+router.patch("/:id", asyncHandler(updateProjectPartially));
+
+router.post("/", validateProject, asyncHandler(createProject));
+
+router.delete("/:id", asyncHandler(deleteProject));
 
 module.exports = router;
